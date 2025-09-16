@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main-styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="page-header">
+            <h1><i class="fas fa-home"></i> Beranda</h1>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard">
+                <div class="welcome-card card">
+                    <h2>Selamat datang, {{ session.username }}!</h2>
+                    <p>Jelajahi berbagai fitur yang tersedia untuk terhubung dengan pengguna lainnya.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-stream"></i>
+                        </div>
+                        <h3>Feed</h3>
+                        <p>Lihat postingan dari pengguna yang Anda ikuti</p>
+                        <a href="{{ url_for('feed') }}" class="btn-primary">Jelajahi Feed</a>
+                    </div>
+
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Cari Pengguna</h3>
+                        <p>Temukan dan ikuti pengguna lainnya</p>
+                        <a href="{{ url_for('search') }}" class="btn-primary">Cari Sekarang</a>
+                    </div>
+
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <h3>Buat Postingan</h3>
+                        <p>Bagikan pemikiran dan gambar Anda</p>
+                        <a href="{{ url_for('create_post') }}" class="btn-primary">Buat Postingan</a>
+                    </div>
+
+                    <div class="feature-card card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>Profil Saya</h3>
+                        <p>Kelola profil dan lihat postingan Anda</p>
+                        <a href="{{ url_for('profile', username=session.username) }}" class="btn-primary">Lihat Profil</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="{{ url_for('home') }}" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('search') }}" class="nav-item">
+                <i class="fas fa-search"></i>
+                <span>Cari</span>
+            </a>
+            <a href="{{ url_for('create_post') }}" class="nav-item">
+                <i class="fas fa-plus-square"></i>
+                <span>Posting</span>
+            </a>
+            <a href="{{ url_for('feed') }}" class="nav-item">
+                <i class="fas fa-newspaper"></i>
+                <span>Feed</span>
+            </a>
+            <a href="{{ url_for('profile', username=session.username) }}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>

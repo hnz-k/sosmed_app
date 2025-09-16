@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postingan - {{ post.username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1><i class="fas fa-post"></i> Postingan</h1>
+            <a href="{{ url_for('home') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+        </header>
+
+        <main class="main-content">
+            <div class="post-detail">
+                <div class="post card">
+                    <div class="post-header">
+                        <div class="post-author">
+                            {% if post.profile_picture %}
+                                <img src="{{ url_for('static', filename='uploads/' + post.profile_picture) }}" alt="{{ post.username }}" class="post-avatar">
+                            {% else %}
+                                <div class="avatar-placeholder small">{{ post.username[0]|upper }}</div>
+                            {% endif %}
+                            <div class="author-info">
+                                <span class="author-name">{{ post.display_name or post.username }}</span>
+                                <span class="author-username">@{{ post.username }}</span>
+                            </div>
+                        </div>
+                        <span class="post-time"><i class="far fa-clock"></i> {{ post.created_at[:16] }}</span>
+                    </div>
+                    
+                    <div class="post-content">
+                        <p>{{ post.content }}</p>
+                        {% if post.image_path %}
+                            <div class="post-image">
+                                <img src="{{ url_for('static', filename='uploads/' + post.image_path) }}" alt="Post image">
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="post-stats">
+                        <span class="stat-item"><i class="fas fa-heart"></i> {{ likes_count }} Suka</span>
+                        <span class="stat-item"><i class="fas fa-comment"></i> {{ comments|length }} Komentar</span>
+                    </div>
+                    
+                    <div class="post-actions">
+                        <button class="btn-like {% if is_liked %}liked{% endif %}" data-post-id="{{ post.id }}">
+                            <i class="{% if is_liked %}fas{% else %}far{% endif %} fa-heart"></i> 
+                            <span class="like-text">{% if is_liked %}Suka{% else %}Suka{% endif %}</span>
+                        </button>
+                        <a href="#comment-form" class="btn-comment">
+                            <i class="fas fa-comment"></i> Komentar
+                        </a>
+                        <a href="{{ url_for('profile', username=post.username) }}" class="btn-secondary"><i class="fas fa-user"></i> Profil</a>
+                    </div>
+                </div>
+                
+                <!-- Comments Section -->
+                <div class="comments-section card">
+                    <h3><i class="fas fa-comments"></i> Komentar ({{ comments|length }})</h3>
+                    
+                    {% if comments %}
+                    <div class="comments-list">
+                        {% for comment in comments %}
+                        <div class="comment">
+                            <div class="comment-author">
+                                {% if comment.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/' + comment.profile_picture) }}" alt="{{ comment.username }}" class="comment-avatar">
+                                {% else %}
+                                    <div class="avatar-placeholder x-small">{{ comment.username[0]|upper }}</div>
+                                {% endif %}
+                                <div class="comment-author-info">
+                                    <span class="author-name">{{ comment.display_name or comment.username }}</span>
+                                    <span class="comment-time">{{ comment.created_at[:16] }}</span>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                <p>{{ comment.content }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-comments">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>Belum ada komentar. Jadilah yang pertama berkomentar!</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Comment Form -->
+                    <div class="comment-form" id="comment-form">
+                        <h4><i class="fas fa-edit"></i> Tambah Komentar</h4>
+                        <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+                            <div class="form-group">
+                                <textarea name="content" rows="3" placeholder="Tulis komentar Anda..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Kirim Komentar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('search') }}" class="nav-item">
+                <i class="fas fa-search"></i>
+                <span>Cari</span>
+            </a>
+            <a href="{{ url_for('create_post') }}" class="nav-item">
+                <i class="fas fa-plus-square"></i>
+                <span>Posting</span>
+            </a>
+            <a href="{{ url_for('feed') }}" class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Feed</span>
+            </a>
+            <a href="{{ url_for('profile', username=session.username) }}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+    <script>
+    // Like functionality
+    document.querySelector('.btn-like').addEventListener('click', function() {
+        const postId = this.getAttribute('data-post-id');
+        const likeIcon = this.querySelector('i');
+        const likeText = this.querySelector('.like-text');
+        
+        fetch(`/like/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                this.classList.toggle('liked');
+                if (data.action === 'liked') {
+                    likeIcon.classList.remove('far');
+                    likeIcon.classList.add('fas');
+                    likeText.textContent = 'Suka';
+                } else {
+                    likeIcon.classList.remove('fas');
+                    likeIcon.classList.add('far');
+                    likeText.textContent = 'Suka';
+                }
+                
+                // Update like count
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    </script>
+</body>
+</html>
