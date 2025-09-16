@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifikasi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1><i class="fas fa-bell"></i> Notifikasi</h1>
+            <a href="{{ url_for('home') }}" class="btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+        </header>
+
+        <main class="main-content">
+            <div class="notifications-container">
+                {% if notifications %}
+                <div class="notifications-list">
+                    {% for notification in notifications %}
+                    <div class="notification card {% if not notification.is_read %}unread{% endif %}">
+                        <div class="notification-content">
+                            <div class="notification-actor">
+                                {% if notification.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/' + notification.profile_picture) }}" alt="{{ notification.username }}" class="notification-avatar">
+                                {% else %}
+                                    <div class="avatar-placeholder x-small">{{ notification.username[0]|upper }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="notification-details">
+                                <p>
+                                    <strong>{{ notification.display_name or notification.username }}</strong>
+                                    {% if notification.type == 'like' %}
+                                        menyukai postingan Anda
+                                    {% elif notification.type == 'comment' %}
+                                        mengomentari postingan Anda
+                                    {% elif notification.type == 'follow' %}
+                                        mulai mengikuti Anda
+                                    {% endif %}
+                                </p>
+                                <span class="notification-time"><i class="far fa-clock"></i> {{ notification.created_at[:16] }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if notification.type == 'like' or notification.type == 'comment' %}
+                        <div class="notification-action">
+                            <a href="{{ url_for('view_post', post_id=notification.post_id) if notification.post_id_exists else '#' }}" class="btn-secondary">
+                                <i class="fas fa-eye"></i> Lihat
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-notifications card">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3>Tidak ada notifikasi</h3>
+                    <p>Anda akan menerima notifikasi ketika ada yang menyukai, mengomentari, atau mengikuti Anda.</p>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('search') }}" class="nav-item">
+                <i class="fas fa-search"></i>
+                <span>Cari</span>
+            </a>
+            <a href="{{ url_for('create_post') }}" class="nav-item">
+                <i class="fas fa-plus-square"></i>
+                <span>Posting</span>
+            </a>
+            <a href="{{ url_for('feed') }}" class="nav-item">
+                <i class="fas fa-heart"></i>
+                <span>Feed</span>
+            </a>
+            <a href="{{ url_for('profile', username=session.username) }}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cari Pengguna</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main-styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="page-header">
+            <h1><i class="fas fa-search"></i> Cari Pengguna</h1>
+        </header>
+
+        <main class="main-content">
+            <!-- Search Form -->
+            <div class="search-container card">
+                <form method="GET" action="{{ url_for('search') }}" class="search-form">
+                    <div class="search-box">
+                        <input type="text" name="q" placeholder="Cari nama pengguna atau nama tampilan..." value="{{ query }}" autocomplete="off">
+                        <button type="submit">
+                            <i class="fas fa-search"></i> 
+                            <span>Cari</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Search History Section -->
+            {% if search_history and not query %}
+            <div class="search-history-section card">
+                <div class="search-history-header">
+                    <h3 class="search-history-title">
+                        <i class="fas fa-history"></i>
+                        Riwayat Pencarian
+                    </h3>
+                    <button class="clear-history-btn" onclick="clearSearchHistory()">
+                        <i class="fas fa-trash"></i>
+                        <span>Hapus Semua</span>
+                    </button>
+                </div>
+                
+<div class="search-history-list">
+    {% for history_query in search_history %}
+    <div class="search-history-item">
+        <div class="history-query">
+            <i class="fas fa-clock"></i>
+            <span>{{ history_query }}</span>
+        </div>
+        <button class="remove-history-item" 
+                data-query="{{ history_query }}" 
+                type="button"
+                title="Hapus item ini">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+            </div>
+            {% elif not search_history and not query %}
+            <!-- No History Message -->
+            <div class="search-placeholder card">
+                <i class="fas fa-history"></i>
+                <h3>Riwayat Pencarian</h3>
+                <p>Tidak ada riwayat pencarian.</p>
+            </div>
+            {% endif %}
+
+            <!-- Search Results -->
+            {% if query %}
+            <div class="search-results">
+                <h2 class="results-title">
+                    <i class="fas fa-search-plus"></i>
+                    Hasil Pencarian untuk "{{ query }}"
+                </h2>
+                
+                {% if results %}
+                    <div class="users-list">
+                        {% for user in results %}
+                        <div class="user-card card">
+                            <div class="user-avatar">
+                                {% if user.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/' + user.profile_picture) }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <div class="avatar-placeholder">{{ user.username[0]|upper }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="user-info">
+                                <h3>{{ user.display_name or user.username }}
+                                    {% if user.is_verified %}
+                                    <span class="verified-badge" title="Akun Terverifikasi">
+                                        <i class="fas fa-check-circle"></i>
+                                    </span>
+                                    {% endif %}
+                                </h3>
+                                <p class="username">@{{ user.username }}</p>
+                            </div>
+                            <div class="user-actions">
+                                <a href="{{ url_for('profile', username=user.username) }}" class="btn-primary">
+                                    <i class="fas fa-eye"></i> 
+                                    <span>Lihat Profil</span>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-results card">
+                        <i class="fas fa-search"></i>
+                        <h3>Tidak Ada Hasil</h3>
+                        <p>Tidak ada pengguna ditemukan untuk "{{ query }}". Coba gunakan kata kunci yang berbeda.</p>
+                    </div>
+                {% endif %}
+            </div>
+            {% elif not search_history %}
+            <!-- Initial Search Placeholder (when no history and no search) -->
+            <div class="search-placeholder card">
+                <i class="fas fa-search"></i>
+                <h3>Cari Pengguna Lain</h3>
+                <p>Masukkan nama pengguna atau nama tampilan di kolom pencarian di atas untuk mulai mencari.</p>
+            </div>
+            {% endif %}
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="{{ url_for('home') }}" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('search') }}" class="nav-item active">
+                <i class="fas fa-search"></i>
+                <span>Cari</span>
+            </a>
+            <a href="{{ url_for('create_post') }}" class="nav-item">
+                <i class="fas fa-plus-square"></i>
+                <span>Posting</span>
+            </a>
+            <a href="{{ url_for('feed') }}" class="nav-item">
+                <i class="fas fa-newspaper"></i>
+                <span>Feed</span>
+            </a>
+            <a href="{{ url_for('profile', username=session.username) }}" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
